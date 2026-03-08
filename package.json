@@ -28,15 +28,10 @@
           "default": true,
           "description": "Enable automatic Gazebo pause/resume on breakpoints."
         },
-        "ros2SimPause.pauseService": {
+        "ros2SimPause.worldName": {
           "type": "string",
-          "default": "/pause_physics",
-          "description": "ROS 2 service name to pause the simulation."
-        },
-        "ros2SimPause.unpauseService": {
-          "type": "string",
-          "default": "/unpause_physics",
-          "description": "ROS 2 service name to resume the simulation."
+          "default": "empty",
+          "description": "Gz world name (used to construct the /world/<name>/control service path)."
         }
       }
     }

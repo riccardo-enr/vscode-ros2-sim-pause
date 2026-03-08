@@ -2,3 +2,9 @@ node_modules/
 dist/
 out/
 *.vsix
+
+
+# ROS 2 colcon artifacts
+build/
+install/
+log/

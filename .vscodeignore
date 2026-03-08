@@ -5,3 +5,4 @@ out/**
 *.vsix
 tsconfig.json
 .eslintrc.json
+test_ws/**

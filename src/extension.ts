@@ -5,30 +5,42 @@ function getConfig() {
     return vscode.workspace.getConfiguration('ros2SimPause');
 }
 
-function callRosService(service: string): void {
-    const config = getConfig();
-    // Reuse RDE's rosSetupScript if available
-    const setupScript = vscode.workspace.getConfiguration('ROS2').get<string>('rosSetupScript') ?? '';
+let outputChannel: vscode.OutputChannel = null!;
 
-    const cmd = setupScript
-        ? `source "${setupScript}" && ros2 service call ${service} std_srvs/srv/Empty {}`
-        : `ros2 service call ${service} std_srvs/srv/Empty {}`;
+function callGzService(pause: boolean): void {
+    const worldName = getConfig().get<string>('worldName') ?? 'default';
+    const service = `/world/${worldName}/control`;
+    const req = pause ? 'pause: true' : 'pause: false';
 
-    spawn('bash', ['-c', cmd], { detached: true, stdio: 'ignore' }).unref();
+    const cmd = `gz service -s ${service} --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 1000 --req "${req}"`;
+
+    outputChannel.appendLine(`[ros2-sim-pause] Running: ${cmd}`);
+
+    const proc = spawn('bash', ['-c', cmd], { detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
+    proc.stdout?.on('data', (data: Buffer) => outputChannel.appendLine(`[gz] ${data.toString().trim()}`));
+    proc.stderr?.on('data', (data: Buffer) => outputChannel.appendLine(`[gz err] ${data.toString().trim()}`));
+    proc.on('exit', (code: number | null) => {
+        outputChannel.appendLine(`[gz] exit code: ${code}`);
+        if (code !== 0) {
+            vscode.window.showWarningMessage(
+                `ros2-sim-pause: gz service call failed (exit ${code}). Check "ROS 2 Sim Pause" output.`
+            );
+        }
+    });
+    proc.unref();
 }
 
 function pauseGazebo(): void {
-    const service = getConfig().get<string>('pauseService') ?? '/pause_physics';
-    callRosService(service);
+    callGzService(true);
 }
 
 function resumeGazebo(): void {
-    const service = getConfig().get<string>('unpauseService') ?? '/unpause_physics';
-    callRosService(service);
+    callGzService(false);
 }
 
 export function activate(context: vscode.ExtensionContext): void {
     const output = vscode.window.createOutputChannel('ROS 2 Sim Pause');
+    outputChannel = output;
 
     // Status bar item
     const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
@@ -38,28 +50,22 @@ export function activate(context: vscode.ExtensionContext): void {
 
     // Show/hide status bar with debug sessions
     context.subscriptions.push(
-        vscode.debug.onDidStartDebugSession(session => {
-            if (session.type === 'ros2') {
-                statusBar.text = '$(play) Sim running';
-                statusBar.show();
-            }
+        vscode.debug.onDidStartDebugSession(() => {
+            statusBar.text = '$(play) Sim running';
+            statusBar.show();
         }),
-        vscode.debug.onDidTerminateDebugSession(session => {
-            if (session.type === 'ros2') {
-                // Ensure sim is unpaused when session ends
-                resumeGazebo();
-                statusBar.hide();
-            }
+        vscode.debug.onDidTerminateDebugSession(() => {
+            resumeGazebo();
+            statusBar.hide();
         })
     );
 
-    // DAP tracker — observes all ros2 debug sessions
+    // DAP tracker — observes debug sessions
     const trackerFactory: vscode.DebugAdapterTrackerFactory = {
-        createDebugAdapterTracker(session: vscode.DebugSession): vscode.DebugAdapterTracker {
+        createDebugAdapterTracker(): vscode.DebugAdapterTracker {
             return {
                 onDidSendMessage(msg: unknown): void {
                     const m = msg as { type: string; event?: string };
-                    output.appendLine(`[DAP ←] ${JSON.stringify(msg)}`);
 
                     if (m.type === 'event' && m.event === 'stopped') {
                         if (!getConfig().get<boolean>('enabled')) { return; }
@@ -70,7 +76,6 @@ export function activate(context: vscode.ExtensionContext): void {
                 },
                 onWillReceiveMessage(msg: unknown): void {
                     const m = msg as { type: string; command?: string };
-                    output.appendLine(`[DAP →] ${JSON.stringify(msg)}`);
 
                     if (m.type === 'request' &&
                         ['continue', 'next', 'stepIn', 'stepOut'].includes(m.command ?? '')) {
@@ -84,9 +89,12 @@ export function activate(context: vscode.ExtensionContext): void {
         }
     };
 
-    context.subscriptions.push(
-        vscode.debug.registerDebugAdapterTrackerFactory('ros2', trackerFactory)
-    );
+    // Register tracker for all debug types RDE might use
+    for (const debugType of ['ros2', 'cppdbg', 'cppvsdbg', 'debugpy']) {
+        context.subscriptions.push(
+            vscode.debug.registerDebugAdapterTrackerFactory(debugType, trackerFactory)
+        );
+    }
 
     output.appendLine('ROS 2 Sim Pause activated');
 }
