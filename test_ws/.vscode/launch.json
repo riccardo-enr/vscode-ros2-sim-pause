@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "ROS2: Debug test_node",
+      "type": "ros2",
+      "request": "launch",
+      "launch": [
+        {
+          "package": "sim_pause_test",
+          "launchFile": "test.launch.py"
+        }
+      ],
+      "attachDebugger": ["test_node"]
+    }
+  ]
+}

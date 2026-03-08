@@ -1,0 +1,6 @@
+# ros_gz_bridge config — bridges /world/default/control from Gz Transport → ROS 2
+# Change "default" to match your world name if different.
+- service: /world/default/control
+  ros_type_name: ros_gz_interfaces/srv/ControlWorld
+  gz_type_name: gz.msgs.WorldControl
+  direction: CLIENT_SERVER

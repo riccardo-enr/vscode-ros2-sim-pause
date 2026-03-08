@@ -1,0 +1,5 @@
+{
+  "ros2SimPause.enabled": true,
+  "ros2SimPause.pauseService": "/pause_physics",
+  "ros2SimPause.unpauseService": "/unpause_physics"
+}
