@@ -1,0 +1,56 @@
+{
+  "name": "vscode-ros2-sim-pause",
+  "displayName": "ROS 2 Sim Pause",
+  "description": "Pauses Gazebo simulation on debugger breakpoints when using RDE",
+  "version": "0.1.0",
+  "publisher": "riccardo-enr",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/riccardo-enr/vscode-ros2-sim-pause"
+  },
+  "engines": {
+    "vscode": "^1.101.0"
+  },
+  "categories": ["Debuggers"],
+  "keywords": ["ros2", "gazebo", "debugger", "simulation"],
+  "activationEvents": [
+    "onDebug"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "ROS 2 Sim Pause",
+      "properties": {
+        "ros2SimPause.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable automatic Gazebo pause/resume on breakpoints."
+        },
+        "ros2SimPause.pauseService": {
+          "type": "string",
+          "default": "/pause_physics",
+          "description": "ROS 2 service name to pause the simulation."
+        },
+        "ros2SimPause.unpauseService": {
+          "type": "string",
+          "default": "/unpause_physics",
+          "description": "ROS 2 service name to resume the simulation."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
+    "watch": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap --watch",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/vscode": "^1.101.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.0"
+  }
+}

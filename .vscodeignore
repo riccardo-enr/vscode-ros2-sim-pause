@@ -1,0 +1,7 @@
+.vscode/**
+src/**
+node_modules/**
+out/**
+*.vsix
+tsconfig.json
+.eslintrc.json
