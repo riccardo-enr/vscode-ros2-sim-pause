@@ -1,6 +1,12 @@
 # Contributing
 
-Thank you for your interest in contributing! This is a small focused extension, so contributions should stay aligned with its purpose: pausing/resuming Gazebo simulations in sync with VS Code debugger breakpoints.
+Thank you for your interest in contributing!
+
+## Goal
+
+This extension exists to provide seamless Gazebo simulation pause/resume during ROS 2 debugging sessions in VS Code. The long-term goal is to contribute this functionality directly to [RDE (Ranch Hand Robotics)](https://github.com/Ranch-Hand-Robotics/rde-ros-2), so that users get it out of the box without a separate extension. This repo serves as a proof of concept and reference implementation for that upstream PR.
+
+Contributions should stay aligned with that purpose. If you have ideas for how to make the integration with RDE cleaner or how to structure an upstream contribution, those are especially welcome.
 
 ## Getting started
 

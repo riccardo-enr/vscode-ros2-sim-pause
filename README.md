@@ -6,6 +6,12 @@ Works as a companion to **[RDE (Ranch Hand Robotics)](https://marketplace.visual
 
 > **Tested with**: Gz Sim 8.x (Gz Harmonic). Other Gazebo versions may require different service names — see [Simulator compatibility](#simulator-compatibility).
 
+## Goal
+
+The primary goal of this extension is to provide seamless Gazebo simulation pause/resume functionality during ROS 2 debugging sessions in VS Code.
+
+Long-term, the intent is to contribute this functionality directly to [RDE (Ranch Hand Robotics)](https://github.com/Ranch-Hand-Robotics/rde-ros-2) so that users get it out of the box without a separate extension. This project serves as a proof of concept and reference implementation for that upstream contribution.
+
 ## Why
 
 When debugging a ROS 2 node mid-simulation the world keeps running while you inspect code at a breakpoint. Sensor data drifts, the robot moves, and it becomes hard to reason about what the node was actually seeing at the moment execution paused.
